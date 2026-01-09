@@ -3,7 +3,7 @@
 This repository contains **original notes/specs** for an open-source cloud shell with a fog/distributed-systems twist.
 
 Policy:
-- **No IBM diagrams**, screenshots, extracted labels, or copied design artifacts.
+- **No Proprietary diagrams**, screenshots, extracted labels, or copied design artifacts.
 - Only clean-room notes: requirements, our architecture, interface contracts, and implementation plans.
 
 Next:
