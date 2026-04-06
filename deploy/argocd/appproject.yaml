@@ -1,0 +1,49 @@
+# Argo CD AppProject for the cloudshell-fog application.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: cloudshell-fog
+  namespace: argocd
+spec:
+  description: Fog-optimised cloud shell
+
+  # Source repos allowed for this project.
+  sourceRepos:
+    - "https://github.com/SocioProphet/cloudshell-fog"
+
+  # Destination clusters and namespaces.
+  destinations:
+    - namespace: cloudshell-system
+      server: https://kubernetes.default.svc
+    - namespace: argocd
+      server: https://kubernetes.default.svc
+
+  # Cluster-scoped resources the project may manage.
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRoleBinding
+
+  # Namespace-scoped resources.
+  namespaceResourceWhitelist:
+    - group: "apps"
+      kind: Deployment
+    - group: ""
+      kind: Service
+    - group: ""
+      kind: ServiceAccount
+    - group: ""
+      kind: ConfigMap
+    - group: ""
+      kind: Secret
+    - group: networking.k8s.io
+      kind: NetworkPolicy
+
+  roles:
+    - name: read-only
+      description: Read-only access to the project
+      policies:
+        - "p, proj:cloudshell-fog:read-only, applications, get, cloudshell-fog/*, allow"

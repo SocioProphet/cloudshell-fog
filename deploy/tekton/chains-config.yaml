@@ -1,0 +1,27 @@
+# Tekton Chains configuration.
+# Chains automatically intercepts TaskRun completions and:
+#   1. Signs the OCI image with cosign (keyless via Sigstore / OIDC).
+#   2. Attaches an in-toto provenance attestation to the image.
+#   3. Stores the attestation in the OCI registry alongside the image.
+#
+# Apply to the tekton-chains namespace after installing Tekton Chains:
+#   kubectl apply -f deploy/tekton/chains-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chains-config
+  namespace: tekton-chains
+data:
+  # Sign the OCI image using cosign keyless (OIDC workload identity).
+  artifacts.oci.signer: "cosign"
+  artifacts.oci.storage: "oci"
+
+  # Generate in-toto SLSA provenance attestations for TaskRuns.
+  artifacts.taskrun.format: "slsa/v1"
+  artifacts.taskrun.signer: "cosign"
+  artifacts.taskrun.storage: "oci"
+
+  # Use the cluster's OIDC issuer for keyless signing (adjust for your cluster).
+  signers.cosign.fulcio.address: "https://fulcio.sigstore.dev"
+  signers.cosign.rekor.address: "https://rekor.sigstore.dev"
+  signers.cosign.tuf.mirror.url: "https://tuf.sigstore.dev"

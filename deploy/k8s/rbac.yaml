@@ -1,0 +1,79 @@
+# ServiceAccount for the gateway pod.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cloudshell-gateway
+  namespace: cloudshell-system
+automountServiceAccountToken: false
+---
+# ClusterRole — gateway needs to manage per-session namespaces and pods.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cloudshell-gateway
+rules:
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create"]
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cloudshell-gateway
+subjects:
+  - kind: ServiceAccount
+    name: cloudshell-gateway
+    namespace: cloudshell-system
+roleRef:
+  kind: ClusterRole
+  name: cloudshell-gateway
+  apiGroup: rbac.authorization.k8s.io
+---
+# ConfigMap carrying the policy configuration.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloudshell-policy
+  namespace: cloudshell-system
+data:
+  policy.yaml: |
+    profiles:
+      - name: default
+        cpu: "500m"
+        memory: "512Mi"
+        storage: "1Gi"
+        max_ttl_seconds: 3600
+        max_sessions: 3
+        allowed_groups: []
+      - name: large
+        cpu: "2"
+        memory: "2Gi"
+        storage: "10Gi"
+        max_ttl_seconds: 7200
+        max_sessions: 1
+        allowed_groups:
+          - power-users
+          - admins
+---
+# Secret: generate this with:
+#   kubectl -n cloudshell-system create secret generic cloudshell-secrets \
+#     --from-literal=session-token-signing-key=$(openssl rand -hex 32)
+#
+# The placeholder below is intentionally empty — do NOT commit real keys.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cloudshell-secrets
+  namespace: cloudshell-system
+type: Opaque
+stringData:
+  session-token-signing-key: "REPLACE_ME_WITH_32_BYTES_HEX"

@@ -1,0 +1,28 @@
+.PHONY: build test lint vet frontend docker-build
+
+## build: compile the gateway binary
+build:
+	go build -o bin/gateway ./cmd/gateway
+
+## test: run all Go tests
+test:
+	go test ./...
+
+## vet: run go vet
+vet:
+	go vet ./...
+
+## lint: run go vet (extend with golangci-lint if available)
+lint: vet
+
+## frontend: install npm deps and build the web UI bundle
+frontend:
+	cd web && npm ci && npm run build
+
+## docker-build: build the multi-stage Docker image
+docker-build:
+	docker build -t cloudshell-fog:dev .
+
+## run-dev: run the gateway in dev mode (stub connector, no OIDC)
+run-dev: build
+	USE_STUB_CONNECTOR=1 ./bin/gateway
