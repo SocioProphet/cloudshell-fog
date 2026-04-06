@@ -109,7 +109,7 @@ func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.ImageRef == "" {
-		req.ImageRef = "ghcr.io/socioproph/cloudshell-runtime:latest"
+		req.ImageRef = "ghcr.io/socioprophet/cloudshell-runtime:latest"
 	}
 
 	sessionID := uuid.NewString()

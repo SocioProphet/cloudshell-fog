@@ -23,7 +23,7 @@ spec:
       containers:
         - name: gateway
           # Pin to a digest in production (interfaces-v1 §2).
-          image: ghcr.io/socioproph/cloudshell-fog/gateway:latest
+          image: ghcr.io/socioprophet/cloudshell-fog/gateway:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
