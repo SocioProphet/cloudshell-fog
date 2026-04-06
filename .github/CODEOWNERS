@@ -1,0 +1,15 @@
+# Primary maintainers
+* @SocioProphet
+
+# Go gateway and internal packages
+/cmd/ @SocioProphet
+/internal/ @SocioProphet
+
+# Web UI
+/web/ @SocioProphet
+
+# Deployment manifests
+/deploy/ @SocioProphet
+
+# Docs and specs
+/docs/ @SocioProphet

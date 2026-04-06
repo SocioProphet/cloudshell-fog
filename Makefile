@@ -1,4 +1,8 @@
-.PHONY: build test lint vet frontend docker-build
+.PHONY: build test lint vet frontend docker-build run-dev help
+
+## help: show this help message
+help:
+	@grep -E '^## [a-z]' Makefile | sed 's/^## /  /'
 
 ## build: compile the gateway binary
 build:
