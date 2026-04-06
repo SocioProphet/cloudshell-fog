@@ -1,0 +1,21 @@
+# Policy configuration — loaded at gateway startup.
+# Set POLICY_CONFIG env var to override the path.
+
+profiles:
+  - name: default
+    cpu: "500m"
+    memory: "512Mi"
+    storage: "1Gi"
+    max_ttl_seconds: 3600
+    max_sessions: 3
+    allowed_groups: []   # empty = allow all authenticated users
+
+  - name: large
+    cpu: "2"
+    memory: "2Gi"
+    storage: "10Gi"
+    max_ttl_seconds: 7200
+    max_sessions: 1
+    allowed_groups:
+      - power-users
+      - admins
