@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudshell-gateway
+  namespace: cloudshell-system
+  labels:
+    app: cloudshell-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloudshell-gateway
+  template:
+    metadata:
+      labels:
+        app: cloudshell-gateway
+    spec:
+      serviceAccountName: cloudshell-gateway
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: gateway
+          # Pin to a digest in production (interfaces-v1 §2).
+          image: ghcr.io/socioprophet/cloudshell-fog/gateway:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: LISTEN_ADDR
+              value: ":8080"
+            - name: POLICY_CONFIG
+              value: "/app/config/policy.yaml"
+            - name: CLOUD_FALLBACK_REGION
+              value: "us-east-1"
+            - name: GATEWAY_URL
+              value: "wss://shell.example.com"
+            # OIDC: set these to enable real token validation.
+            # - name: OIDC_ISSUER_URL
+            #   value: "https://accounts.example.com"
+            # - name: OIDC_CLIENT_ID
+            #   value: "cloudshell"
+            - name: SESSION_TOKEN_SIGNING_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: cloudshell-secrets
+                  key: session-token-signing-key
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: config
+          configMap:
+            name: cloudshell-policy
+        - name: tmp
+          emptyDir: {}

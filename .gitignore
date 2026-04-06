@@ -1,2 +1,15 @@
 
 .DS_Store
+
+# Go build output
+bin/
+
+# Web build artifacts
+web/node_modules/
+web/public/bundle.js
+web/public/xterm.css
+
+# Editor
+.vscode/
+.idea/
+*.swp

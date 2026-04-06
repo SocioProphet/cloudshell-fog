@@ -1,0 +1,82 @@
+# Tekton Pipeline: clone → test → build → SBOM → sign.
+# Tekton Chains intercepts the TaskRun results to attach a cosign signature
+# and in-toto provenance attestation automatically.
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: cloudshell-fog-ci
+  namespace: cloudshell-system
+spec:
+  params:
+    - name: git-url
+      description: Git repository URL
+    - name: git-revision
+      description: Git revision (branch, tag, or commit SHA)
+      default: main
+    - name: image
+      description: "Target image reference, e.g. ghcr.io/org/repo:$(git-revision)"
+
+  workspaces:
+    - name: source
+    - name: docker-credentials
+
+  tasks:
+    # ── Clone ────────────────────────────────────────────────────────────────
+    - name: git-clone
+      taskRef:
+        resolver: hub
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: git-clone
+          - name: version
+            value: "0.9"
+      params:
+        - name: url
+          value: $(params.git-url)
+        - name: revision
+          value: $(params.git-revision)
+      workspaces:
+        - name: output
+          workspace: source
+
+    # ── Test ─────────────────────────────────────────────────────────────────
+    - name: go-test
+      runAfter: [git-clone]
+      taskRef:
+        resolver: hub
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: golang-test
+          - name: version
+            value: "0.2"
+      params:
+        - name: package
+          value: "./..."
+        - name: flags
+          value: "-v -race"
+      workspaces:
+        - name: source
+          workspace: source
+
+    # ── Build + SBOM ──────────────────────────────────────────────────────────
+    - name: build-and-sbom
+      runAfter: [go-test]
+      taskRef:
+        kind: Task
+        name: build-and-sbom
+      params:
+        - name: image
+          value: $(params.image)
+      workspaces:
+        - name: source
+          workspace: source
+
+  results:
+    - name: image-url
+      value: $(tasks.build-and-sbom.results.image-url)
+    - name: image-digest
+      value: $(tasks.build-and-sbom.results.image-digest)

@@ -1,0 +1,21 @@
+{
+  "name": "cloudshell-fog-ui",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Browser terminal UI for the fog-optimised cloud shell",
+  "scripts": {
+    "build": "webpack --mode production",
+    "dev": "webpack --mode development --watch"
+  },
+  "dependencies": {
+    "@xterm/xterm": "^5.3.0",
+    "@xterm/addon-fit": "^0.10.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "ts-loader": "^9.5.1",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4",
+    "copy-webpack-plugin": "^12.0.2"
+  }
+}

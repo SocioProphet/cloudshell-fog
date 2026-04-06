@@ -1,0 +1,58 @@
+# Deny all ingress/egress for session pods by default.
+# Each session namespace should apply this policy.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  # Apply this to every cloudshell-<sessionID> namespace at provisioning time.
+  namespace: cloudshell-system  # template — apply per session namespace
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+# Allow gateway → session pod (PTY exec traffic via k8s API server).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-gateway-to-shell
+  namespace: cloudshell-system
+spec:
+  podSelector:
+    matchLabels:
+      cloudshell.io/managed: "true"
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cloudshell-system
+          podSelector:
+            matchLabels:
+              app: cloudshell-gateway
+---
+# Allow limited egress from session pods (DNS + HTTPS only).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-shell-egress
+  namespace: cloudshell-system
+spec:
+  podSelector:
+    matchLabels:
+      cloudshell.io/managed: "true"
+  policyTypes:
+    - Egress
+  egress:
+    # DNS
+    - ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+    # HTTPS (package installs, etc.)
+    - ports:
+        - port: 443
+          protocol: TCP

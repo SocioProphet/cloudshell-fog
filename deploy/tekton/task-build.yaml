@@ -1,0 +1,51 @@
+# Tekton Task: build OCI image with kaniko, generate SBOM with syft,
+# and push both to the OCI registry.
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: build-and-sbom
+  namespace: cloudshell-system
+spec:
+  params:
+    - name: image
+      description: "Fully-qualified image reference, e.g. ghcr.io/org/repo:tag"
+    - name: dockerfile
+      description: Path to the Dockerfile
+      default: Dockerfile
+    - name: context
+      description: Build context path inside the workspace
+      default: "."
+
+  workspaces:
+    - name: source
+      description: Cloned source repository
+
+  steps:
+    - name: build-push
+      # kaniko builds without Docker daemon — safe in a container.
+      image: gcr.io/kaniko-project/executor:latest
+      args:
+        - "--dockerfile=$(params.dockerfile)"
+        - "--context=dir://$(workspaces.source.path)/$(params.context)"
+        - "--destination=$(params.image)"
+        - "--digest-file=/tekton/results/image-digest"
+      env:
+        - name: DOCKER_CONFIG
+          value: /kaniko/.docker
+
+    - name: generate-sbom
+      # syft generates an SPDX/CycloneDX SBOM from the built image.
+      image: anchore/syft:latest
+      command:
+        - syft
+        - "$(params.image)"
+        - "-o"
+        - "spdx-json=/tekton/results/sbom.spdx.json"
+
+  results:
+    - name: image-digest
+      description: The digest of the built image
+    - name: image-url
+      description: The URL of the built image
+    - name: sbom
+      description: SPDX SBOM in JSON format
