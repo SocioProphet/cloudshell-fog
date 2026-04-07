@@ -22,5 +22,13 @@ COPY --from=go-build /gateway ./gateway
 COPY --from=frontend-build /web/public ./web/public
 COPY config/ ./config/
 
+LABEL org.opencontainers.image.title="cloudshell-fog" \
+      org.opencontainers.image.description="Fog-optimised cloud shell gateway with OIDC, placement engine, and WebSocket PTY" \
+      org.opencontainers.image.url="https://github.com/SocioProphet/cloudshell-fog" \
+      org.opencontainers.image.source="https://github.com/SocioProphet/cloudshell-fog" \
+      org.opencontainers.image.documentation="https://github.com/SocioProphet/cloudshell-fog/blob/main/README.md" \
+      org.opencontainers.image.licenses="Apache-2.0" \
+      org.opencontainers.image.vendor="SocioProphet"
+
 EXPOSE 8080
 ENTRYPOINT ["/app/gateway"]
