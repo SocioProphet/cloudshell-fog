@@ -14,11 +14,6 @@ const GATEWAY_HTTP =
 
 const SESSION_API = `${GATEWAY_HTTP}/v1/sessions`;
 
-// WebSocket URL uses the ws(s) scheme derived from the HTTP scheme.
-function wsBase(): string {
-  return GATEWAY_HTTP.replace(/^http/, "ws");
-}
-
 // ─── Message frame types (interfaces-v1 §1.3) ─────────────────────────────────
 
 interface ResizeFrame {
