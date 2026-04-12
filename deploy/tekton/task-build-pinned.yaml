@@ -1,0 +1,18 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: build-and-scan-pinned
+spec:
+  params:
+    - name: IMAGE
+      type: string
+  steps:
+    - name: build
+      image: gcr.io/kaniko-project/executor:v1.20.1
+      args:
+        - "--destination=$(params.IMAGE)"
+        - "--context=$(workspaces.source.path)"
+    - name: sbom
+      image: anchore/syft:v0.104.0
+      script: |
+        syft $(params.IMAGE) -o spdx-json > sbom.json
