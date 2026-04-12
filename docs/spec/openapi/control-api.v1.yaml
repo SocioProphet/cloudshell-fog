@@ -1,0 +1,153 @@
+openapi: 3.1.0
+info:
+  title: cloudshell-fog Control API
+  version: "1.0.0"
+  description: |
+    OpenAPI schema for the currently implemented session lifecycle API.
+    This schema is intentionally aligned to the reviewed implementation rather than a richer future placement object.
+servers:
+  - url: https://shell.example.com
+paths:
+  /v1/sessions:
+    post:
+      summary: Create a session
+      operationId: createSession
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSessionRequest'
+      responses:
+        '201':
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateSessionResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Policy denied / forbidden
+        '500':
+          description: Internal error
+        '503':
+          description: Placement unavailable
+  /v1/sessions/{id}:
+    get:
+      summary: Get session
+      operationId: getSession
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Session status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetSessionResponse'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Session not found
+    delete:
+      summary: Delete session
+      operationId: deleteSession
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Terminated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [terminated]
+                properties:
+                  terminated:
+                    type: boolean
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Session not found
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    CreateSessionRequest:
+      type: object
+      required: [profile]
+      properties:
+        profile:
+          type: string
+        ttl_seconds:
+          type: integer
+          minimum: 1
+          default: 3600
+        placement_hint:
+          type: string
+        image_ref:
+          type: string
+    AttachInfo:
+      type: object
+      required: [ws_url, token, expires_at]
+      properties:
+        ws_url:
+          type: string
+          format: uri
+        token:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
+    CreateSessionResponse:
+      type: object
+      required: [session_id, attach, placement]
+      properties:
+        session_id:
+          type: string
+        attach:
+          $ref: '#/components/schemas/AttachInfo'
+        placement:
+          type: string
+          description: Current implementation returns the selected region as a string.
+    GetSessionResponse:
+      type: object
+      required: [status, placement, created_at, expires_at, image_ref]
+      properties:
+        status:
+          type: string
+          enum: [pending, running, terminated, expired]
+        placement:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+        image_ref:
+          type: string
