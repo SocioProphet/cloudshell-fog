@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/SocioProphet/cloudshell-fog/docs/spec/jsonschema/ws-pty.v1.json",
+  "title": "cloudshell-fog PTY WebSocket Frame v1",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": ["resize", "stdin", "stdout", "exit"]
+    },
+    "cols": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "rows": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "data_b64": {
+      "type": "string"
+    },
+    "code": {
+      "type": "integer"
+    }
+  },
+  "required": ["type"],
+  "allOf": [
+    {
+      "if": {
+        "properties": { "type": { "const": "resize" } }
+      },
+      "then": {
+        "required": ["cols", "rows"]
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "enum": ["stdin", "stdout"] } }
+      },
+      "then": {
+        "required": ["data_b64"]
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "exit" } }
+      },
+      "then": {
+        "required": ["code"]
+      }
+    }
+  ],
+  "additionalProperties": false
+}
