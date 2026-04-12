@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/SocioProphet/cloudshell-fog/docs/spec/jsonschema/audit-event.v1.json",
+  "title": "cloudshell-fog Audit Event v1",
+  "type": "object",
+  "properties": {
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "session_id": {
+      "type": "string"
+    },
+    "subject": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "session.created",
+        "session.attached",
+        "session.terminated",
+        "placement.decided",
+        "runtime.allocated",
+        "policy.denied",
+        "pty.resize"
+      ]
+    },
+    "placement": {
+      "type": "string"
+    },
+    "details": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "required": ["ts", "subject", "type"],
+  "additionalProperties": false
+}
