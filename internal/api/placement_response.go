@@ -1,0 +1,51 @@
+package api
+
+import (
+	"fmt"
+	"time"
+
+	"github.com/SocioProphet/cloudshell-fog/internal/placement"
+)
+
+// PlacementResponse is a richer placement payload than the current region-only
+// response. It preserves the implementation's placement decision metadata in a
+// stable JSON shape for future API alignment work.
+type PlacementResponse struct {
+	Region  string   `json:"region"`
+	NodeID  string   `json:"node_id"`
+	Tier    string   `json:"tier"`
+	Reasons []string `json:"reasons,omitempty"`
+}
+
+// AttachResponse describes the PTY attach details returned after session creation.
+type AttachResponse struct {
+	WSURL     string `json:"ws_url"`
+	Token     string `json:"token"`
+	ExpiresAt string `json:"expires_at"`
+}
+
+// CreateSessionResponseVNext is a richer response envelope for session creation.
+type CreateSessionResponseVNext struct {
+	SessionID string            `json:"session_id"`
+	Attach    AttachResponse    `json:"attach"`
+	Placement PlacementResponse `json:"placement"`
+}
+
+// BuildCreateSessionResponseVNext converts the current placement engine decision
+// plus attach material into a richer response payload.
+func BuildCreateSessionResponseVNext(sessionID, gatewayURL, token string, tokenExpiresAt time.Time, decision placement.Decision) CreateSessionResponseVNext {
+	return CreateSessionResponseVNext{
+		SessionID: sessionID,
+		Attach: AttachResponse{
+			WSURL:     fmt.Sprintf("%s/v1/sessions/%s/pty", gatewayURL, sessionID),
+			Token:     token,
+			ExpiresAt: tokenExpiresAt.UTC().Format(time.RFC3339),
+		},
+		Placement: PlacementResponse{
+			Region:  decision.Region,
+			NodeID:  decision.NodeID,
+			Tier:    string(decision.Tier),
+			Reasons: append([]string(nil), decision.Reasons...),
+		},
+	}
+}
