@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudshell-policy
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/SocioProphet/cloudshell-fog
+    targetRevision: main
+    path: policy
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cloudshell-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
