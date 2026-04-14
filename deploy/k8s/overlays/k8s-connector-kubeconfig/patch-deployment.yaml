@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudshell-gateway
+  namespace: cloudshell-system
+spec:
+  template:
+    spec:
+      containers:
+        - name: gateway
+          env:
+            - name: CONNECTOR_MODE
+              value: "k8s"
+            - name: KUBECONFIG
+              value: "/var/run/cloudshell/kubeconfig/config"
+          volumeMounts:
+            - name: cloudshell-kubeconfig
+              mountPath: /var/run/cloudshell/kubeconfig
+              readOnly: true
+      volumes:
+        - name: cloudshell-kubeconfig
+          secret:
+            secretName: cloudshell-kubeconfig
