@@ -3,6 +3,7 @@
 
 # Go build output
 bin/
+gateway
 
 # Web build artifacts
 web/node_modules/
