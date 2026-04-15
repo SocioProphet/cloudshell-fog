@@ -75,9 +75,11 @@ func run() error {
 	placementEngine := placement.NewEngine(registry, cloudFallback)
 
 	// ── Runtime connector ─────────────────────────────────────────────────────
-	var conn connector.Connector
-	conn = connector.NewStubConnector()
-	logger.Info("using stub connector (set USE_K8S=1 and provide kubeconfig for k8s)")
+	conn, connMode, err := buildConnector(logger)
+	if err != nil {
+		return fmt.Errorf("build connector: %w", err)
+	}
+	_ = connMode // already logged inside buildConnector
 
 	// ── Session TTL sweeper ───────────────────────────────────────────────────
 	sweeper := session.NewSweeper(store, func(sCtx context.Context, s *session.Session) {
