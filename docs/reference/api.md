@@ -76,7 +76,12 @@ curl -s -X POST https://shell.example.com/v1/sessions \
     "token": "<short-lived JWT>",
     "expires_at": "2026-01-01T00:15:00Z"
   },
-  "placement": "eu-west-1"
+  "placement": {
+    "region": "eu-west-1",
+    "node_id": "fog-node-1",
+    "tier": "fog",
+    "reasons": ["fog-preferred", "healthy", "capacity-ok"]
+  }
 }
 ```
 
@@ -86,7 +91,10 @@ curl -s -X POST https://shell.example.com/v1/sessions \
 | `attach.ws_url` | Full WebSocket URL for PTY attach |
 | `attach.token` | Short-lived HMAC JWT valid for 15 minutes, scoped to this session only |
 | `attach.expires_at` | Token expiry time (RFC3339) |
-| `placement` | Region or node ID where the runtime was placed |
+| `placement.region` | Region selected by the placement engine |
+| `placement.node_id` | Concrete runtime node selected by the placement engine |
+| `placement.tier` | Placement trust tier such as `fog` or `cloud` |
+| `placement.reasons` | Human-readable decision reasons emitted by the placement engine |
 
 **Error responses**
 
