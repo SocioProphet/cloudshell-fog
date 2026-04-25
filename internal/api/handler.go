@@ -4,7 +4,6 @@ package api
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -179,15 +178,8 @@ func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeJSON(w, http.StatusCreated, map[string]any{
-		"session_id": sessionID,
-		"attach": map[string]any{
-			"ws_url":     fmt.Sprintf("%s/v1/sessions/%s/pty", h.gatewayURL, sessionID),
-			"token":      token,
-			"expires_at": tokenExpiresAt.UTC().Format(time.RFC3339),
-		},
-		"placement": decision.Region,
-	})
+	resp := BuildCreateSessionResponseVNext(sessionID, h.gatewayURL, token, tokenExpiresAt, decision)
+	writeJSON(w, http.StatusCreated, resp)
 }
 
 // GetSession handles GET /v1/sessions/{id}.
