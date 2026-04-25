@@ -1,26 +1,34 @@
 # Engineering Fix Backlog v0 — cloudshell-fog
 
-Purpose: convert the conformance findings into concrete, implementation-facing tasks.
+Purpose: convert conformance findings into concrete, implementation-facing tasks while preserving the distinction between work that is already live on `main` and work that still remains open.
 
-## Priority 0 — make the real path real
+## Current status checkpoint
+
+This backlog originally captured the post-review gaps before the first runtime hook-up wave landed.
+
+As of the current `main` line:
+- connector selection is **wired** through the gateway entrypoint
+- `CONNECTOR_MODE` resolution exists
+- `stub` and `k8s` modes exist as explicit runtime choices
+- unsupported modes fail fast at startup
+
+That means EF-0001 should now be read as completed baseline rather than outstanding work.
+
+## Priority 0 — correctness / trust / deployability
 
 ### EF-0001 — Wire actual connector selection in gateway
-Problem:
-- `cmd/gateway/main.go` currently instantiates the stub connector unconditionally.
-- `internal/connector/k8s.go` exists but is not selected by reviewed gateway wiring.
+Status:
+- **completed on `main`**
 
-Required outcome:
-- gateway chooses backend based on explicit config
-- supported modes should include at least:
-  - `stub`
-  - `k8s`
-- unsupported / misconfigured mode should fail fast at startup
+Observed current state:
+- `cmd/gateway/main.go` calls `buildConnector(logger)`
+- `cmd/gateway/connector_mode.go` resolves `CONNECTOR_MODE`
+- supported modes include `stub` and `k8s`
+- unsupported or misconfigured modes fail fast
 
-Acceptance criteria:
-- `CONNECTOR_MODE=stub` uses stub connector
-- `CONNECTOR_MODE=k8s` uses k8s connector
-- startup logs selected connector mode clearly
-- missing k8s config causes startup error, not silent fallback
+Residual follow-on:
+- keep deployment docs/manifests aligned with the now-live connector path
+- keep credential-model documentation explicit as EF-0004 lands
 
 ### EF-0002 — Verify and correct default runtime image reference
 Problem:
@@ -123,10 +131,12 @@ Required outcome:
   - or keyless verification path
 
 ## Suggested implementation order
-1. EF-0001
-2. EF-0004
-3. EF-0002
-4. EF-0003
-5. EF-0005
-6. EF-0006 / EF-0007
-7. EF-0008 / EF-0009 / EF-0010
+1. EF-0004
+2. EF-0002
+3. EF-0003
+4. EF-0005
+5. EF-0006 / EF-0007
+6. EF-0008 / EF-0009 / EF-0010
+
+## Working rule
+Completed items may remain in this backlog when they explain how the repository moved from reviewed drift to live runtime behavior. The backlog should not silently pretend merged fixes are still missing.
