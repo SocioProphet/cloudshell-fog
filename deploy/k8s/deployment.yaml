@@ -35,6 +35,8 @@ spec:
               value: "/app/config/policy.yaml"
             - name: CLOUD_FALLBACK_REGION
               value: "us-east-1"
+            - name: CONNECTOR_MODE
+              value: "stub"
             - name: GATEWAY_URL
               value: "wss://shell.example.com"
             # OIDC: set these to enable real token validation.
