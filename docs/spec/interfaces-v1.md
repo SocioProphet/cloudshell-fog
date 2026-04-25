@@ -29,7 +29,7 @@ All endpoints require a valid OIDC access token in the `Authorization: Bearer` h
 
 | Method | Path | Description |
 |---|---|---|
-| `POST` | `/v1/sessions` | Create a session. Body: `{ profile, ttl_seconds, placement_hint?, image_ref? }`. Response: `{ session_id, attach: { ws_url, token, expires_at }, placement }`. |
+| `POST` | `/v1/sessions` | Create a session. Body: `{ profile, ttl_seconds, placement_hint?, image_ref? }`. Response: `{ session_id, attach: { ws_url, token, expires_at }, placement: { region, node_id, tier, reasons[] } }`. |
 | `GET` | `/v1/sessions/{id}` | Get session status. Response: `{ status, placement, created_at, expires_at, image_ref }`. |
 | `DELETE` | `/v1/sessions/{id}` | Terminate a session. Response: `{ terminated: true }`. |
 
@@ -105,4 +105,3 @@ Degraded operation:
 
 - If no fog node is reachable or healthy, the placement engine falls back to `CLOUD_FALLBACK_REGION`.
 - Session resume after fog node failure is best-effort; the current status is surfaced to the user.
-
