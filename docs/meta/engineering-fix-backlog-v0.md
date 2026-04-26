@@ -14,8 +14,10 @@ As of the current `main` line:
 - session create and session status now emit structured placement objects
 - session state now persists node / tier / reasons placement metadata
 - repo-local state-machine and machine-readable interface contract artifacts exist under `docs/spec/`
+- Argo CD policy and Tekton application surfaces exist
+- policy root Kustomize selects the keyless Kyverno bundle once this PR lands
 
-That means EF-0001, EF-0005, EF-0006, and EF-0007 should now be read as completed baseline rather than outstanding work.
+That means EF-0001, EF-0004, EF-0005, EF-0006, EF-0007, EF-0008, and the keyless baseline portion of EF-0010 should now be read as completed baseline rather than outstanding work.
 
 ## Priority 0 — correctness / trust / deployability
 
@@ -29,34 +31,28 @@ Observed current state:
 - supported modes include `stub` and `k8s`
 - unsupported or misconfigured modes fail fast
 
-Residual follow-on:
-- keep deployment docs/manifests aligned with the now-live connector path
-- keep credential-model documentation explicit as EF-0004 lands
-
 ### EF-0002 — Verify and correct default runtime image reference
-Problem:
-- earlier implementation review showed a suspicious default image ref path
+Status:
+- **still open**
 
 Required outcome:
 - choose canonical runtime image name/path
 - make it configurable
 - avoid stale or typo-prone hardcoded defaults
-
-Acceptance criteria:
 - code, docs, and deploy manifests all reference the same canonical runtime image naming scheme
 
 ### EF-0003 — Stop advertising mutable tags as production-safe defaults
-Problem:
-- deployment and pipeline artifacts still use `:latest` in places while policy requires digests in production
+Status:
+- **partially mitigated; still open for final production posture**
 
-Required outcome:
-- clearly separate dev examples from production examples
-- production paths should use digest language or explicit placeholders
+Observed current state:
+- production overlay guidance exists
+- pinned Tekton task variant exists
+- base deployment remains dev/demo-oriented
 
-Acceptance criteria:
-- `deploy/k8s/deployment.yaml` no longer looks production-ready while using `:latest`
-- Tekton task tool images are pinned to versions/digests where practical
-- production hardening docs and manifests agree
+Remaining follow-on:
+- continue separating dev/demo base manifests from production-safe overlays
+- keep production hardening docs and manifests aligned
 
 ### EF-0004 — Resolve k8s connector credential model
 Status:
@@ -66,9 +62,6 @@ Observed current state:
 - explicit in-cluster connector overlay exists
 - explicit kubeconfig-based connector overlay exists
 - deployment guide documents both modes
-
-Remaining follow-on:
-- keep overlays, docs, and deployment guidance aligned as operator posture evolves
 
 ## Priority 1 — align external contracts to internal truth
 
@@ -106,37 +99,37 @@ Residual follow-on:
 ## Priority 2 — make GitOps/security less ceremonial
 
 ### EF-0008 — Reconcile policy deployment path under Argo CD
-Problem:
-- current Argo Application points only at `deploy/k8s`
-- policy under `policy/` is not obviously reconciled by Argo
+Status:
+- **completed by Argo policy application plus root policy Kustomize bundle once this PR lands**
 
-Required outcome:
-- either expand Argo scope
-- or document a second Application / app-of-apps structure
+Observed current state:
+- `deploy/argocd/application-policy.yaml` points Argo CD at `policy/`
+- `policy/kustomization.yaml` selects the Kyverno baseline bundle
+- `deploy/argocd/application-tekton.yaml` covers Tekton scope
 
 ### EF-0009 — Turn per-session network policy from template to actual mechanism
-Problem:
-- `deploy/k8s/networkpolicy.yaml` reads as template/example, not full dynamic implementation
+Status:
+- **still open**
 
 Required outcome:
 - define how per-session namespaces get their policies applied
 - likely via runtime provisioning code or namespace bootstrap controller/job
 
 ### EF-0010 — Complete signed-image verification trust material
-Problem:
-- current Kyverno signed-image policy contains placeholder public key material
+Status:
+- **keyless baseline selected once this PR lands; public-key fallback still requires real trust material if used**
 
-Required outcome:
-- choose and document real verification mode:
-  - pinned public key(s)
-  - or keyless verification path
+Observed current state:
+- keyless Kyverno verification policy exists
+- signing trust model recommends keyless baseline
+- root policy bundle selects keyless verification
+- placeholder public-key policy remains as compatibility/example path, not bundled default
 
 ## Suggested implementation order
 1. EF-0002
 2. EF-0003
-3. EF-0008
-4. EF-0009
-5. EF-0010
+3. EF-0009
+4. production hardening follow-through for EF-0010 where non-keyless trust material is required
 
 ## Working rule
 Completed items may remain in this backlog when they explain how the repository moved from reviewed drift to live runtime behavior. The backlog should not silently pretend merged fixes are still missing.
