@@ -107,9 +107,7 @@ func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.ImageRef == "" {
-		req.ImageRef = "ghcr.io/socioprophet/cloudshell-runtime:latest"
-	}
+	req.ImageRef = resolveRuntimeImageRef(req.ImageRef)
 
 	sessionID := uuid.NewString()
 	now := time.Now()
