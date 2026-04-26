@@ -116,16 +116,19 @@ func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
 	expiresAt := now.Add(time.Duration(req.TTLSeconds) * time.Second)
 
 	sess := &session.Session{
-		ID:           sessionID,
-		Subject:      subject,
-		Status:       session.StatusPending,
-		Profile:      req.Profile,
-		Placement:    decision.Region,
-		ImageRef:     req.ImageRef,
-		TTLSeconds:   req.TTLSeconds,
-		CreatedAt:    now,
-		ExpiresAt:    expiresAt,
-		LastActiveAt: now,
+		ID:               sessionID,
+		Subject:          subject,
+		Status:           session.StatusPending,
+		Profile:          req.Profile,
+		Placement:        decision.Region,
+		PlacementNodeID:  decision.NodeID,
+		PlacementTier:    string(decision.Tier),
+		PlacementReasons: append([]string(nil), decision.Reasons...),
+		ImageRef:         req.ImageRef,
+		TTLSeconds:       req.TTLSeconds,
+		CreatedAt:        now,
+		ExpiresAt:        expiresAt,
+		LastActiveAt:     now,
 	}
 	if err := h.store.Create(r.Context(), sess); err != nil {
 		writeError(w, http.StatusInternalServerError, "create session record: "+err.Error())
@@ -200,13 +203,7 @@ func (h *Handler) GetSession(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusForbidden, "forbidden")
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{
-		"status":     string(sess.Status),
-		"placement":  sess.Placement,
-		"created_at": sess.CreatedAt.UTC().Format(time.RFC3339),
-		"expires_at": sess.ExpiresAt.UTC().Format(time.RFC3339),
-		"image_ref":  sess.ImageRef,
-	})
+	writeJSON(w, http.StatusOK, BuildSessionStatusResponseVNext(sess))
 }
 
 // DeleteSession handles DELETE /v1/sessions/{id}.
@@ -228,11 +225,15 @@ func (h *Handler) DeleteSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	nodeID := sess.PlacementNodeID
+	if nodeID == "" {
+		nodeID = sess.Placement
+	}
 	ref := connector.RuntimeRef{
 		ID:        sess.ID,
 		Namespace: "cloudshell-" + sess.ID,
 		PodName:   "shell",
-		NodeID:    sess.Placement,
+		NodeID:    nodeID,
 	}
 	if err := h.connector.Terminate(r.Context(), ref); err != nil {
 		writeError(w, http.StatusInternalServerError, "terminate runtime: "+err.Error())
