@@ -15,9 +15,10 @@ As of the current `main` line:
 - session state now persists node / tier / reasons placement metadata
 - repo-local state-machine and machine-readable interface contract artifacts exist under `docs/spec/`
 - Argo CD policy and Tekton application surfaces exist
-- policy root Kustomize selects the keyless Kyverno bundle once this PR lands
+- policy root Kustomize selects the keyless Kyverno bundle
+- runtime image resolution uses the canonical resolver once this PR lands
 
-That means EF-0001, EF-0004, EF-0005, EF-0006, EF-0007, EF-0008, and the keyless baseline portion of EF-0010 should now be read as completed baseline rather than outstanding work.
+That means EF-0001, EF-0002, EF-0004, EF-0005, EF-0006, EF-0007, EF-0008, and the keyless baseline portion of EF-0010 should now be read as completed baseline rather than outstanding work.
 
 ## Priority 0 — correctness / trust / deployability
 
@@ -33,13 +34,19 @@ Observed current state:
 
 ### EF-0002 — Verify and correct default runtime image reference
 Status:
-- **still open**
+- **completed once this PR lands**
 
-Required outcome:
-- choose canonical runtime image name/path
-- make it configurable
-- avoid stale or typo-prone hardcoded defaults
-- code, docs, and deploy manifests all reference the same canonical runtime image naming scheme
+Observed current state:
+- `internal/api/runtime_image.go` defines the canonical resolver
+- `RUNTIME_IMAGE_REF` is the environment override
+- explicit API `image_ref` still wins
+- canonical dev/demo fallback is `ghcr.io/socioprophet/cloudshell-fog/runtime:dev`
+- `CreateSession` uses `resolveRuntimeImageRef(...)` once this PR lands
+- configuration docs describe `RUNTIME_IMAGE_REF` and production digest expectations
+
+Residual follow-on:
+- production deployments should set `RUNTIME_IMAGE_REF` to a pinned digest
+- EF-0003 still owns final dev/demo versus production-safe image posture cleanup
 
 ### EF-0003 — Stop advertising mutable tags as production-safe defaults
 Status:
@@ -100,7 +107,7 @@ Residual follow-on:
 
 ### EF-0008 — Reconcile policy deployment path under Argo CD
 Status:
-- **completed by Argo policy application plus root policy Kustomize bundle once this PR lands**
+- **completed on `main`**
 
 Observed current state:
 - `deploy/argocd/application-policy.yaml` points Argo CD at `policy/`
@@ -117,7 +124,7 @@ Required outcome:
 
 ### EF-0010 — Complete signed-image verification trust material
 Status:
-- **keyless baseline selected once this PR lands; public-key fallback still requires real trust material if used**
+- **keyless baseline selected on `main`; public-key fallback still requires real trust material if used**
 
 Observed current state:
 - keyless Kyverno verification policy exists
@@ -126,10 +133,9 @@ Observed current state:
 - placeholder public-key policy remains as compatibility/example path, not bundled default
 
 ## Suggested implementation order
-1. EF-0002
-2. EF-0003
-3. EF-0009
-4. production hardening follow-through for EF-0010 where non-keyless trust material is required
+1. EF-0003
+2. EF-0009
+3. production hardening follow-through for EF-0010 where non-keyless trust material is required
 
 ## Working rule
 Completed items may remain in this backlog when they explain how the repository moved from reviewed drift to live runtime behavior. The backlog should not silently pretend merged fixes are still missing.
