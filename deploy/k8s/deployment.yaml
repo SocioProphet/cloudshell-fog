@@ -22,7 +22,8 @@ spec:
           type: RuntimeDefault
       containers:
         - name: gateway
-          # Pin to a digest in production (interfaces-v1 §2).
+          # Base manifest is dev/demo-oriented and intentionally keeps a mutable tag.
+          # Production deployments must use deploy/k8s/overlays/production/ and pin a digest.
           image: ghcr.io/socioprophet/cloudshell-fog/gateway:latest
           imagePullPolicy: Always
           ports:

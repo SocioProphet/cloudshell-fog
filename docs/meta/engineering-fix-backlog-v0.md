@@ -16,9 +16,10 @@ As of the current `main` line:
 - repo-local state-machine and machine-readable interface contract artifacts exist under `docs/spec/`
 - Argo CD policy and Tekton application surfaces exist
 - policy root Kustomize selects the keyless Kyverno bundle
-- runtime image resolution uses the canonical resolver once this PR lands
+- runtime image resolution uses the canonical resolver
+- production image pinning is represented by a concrete production Kustomize overlay once this PR lands
 
-That means EF-0001, EF-0002, EF-0004, EF-0005, EF-0006, EF-0007, EF-0008, and the keyless baseline portion of EF-0010 should now be read as completed baseline rather than outstanding work.
+That means EF-0001, EF-0002, EF-0003, EF-0004, EF-0005, EF-0006, EF-0007, EF-0008, and the keyless baseline portion of EF-0010 should now be read as completed baseline rather than outstanding work once this PR lands.
 
 ## Priority 0 — correctness / trust / deployability
 
@@ -34,32 +35,30 @@ Observed current state:
 
 ### EF-0002 — Verify and correct default runtime image reference
 Status:
-- **completed once this PR lands**
+- **completed on `main`**
 
 Observed current state:
 - `internal/api/runtime_image.go` defines the canonical resolver
 - `RUNTIME_IMAGE_REF` is the environment override
 - explicit API `image_ref` still wins
 - canonical dev/demo fallback is `ghcr.io/socioprophet/cloudshell-fog/runtime:dev`
-- `CreateSession` uses `resolveRuntimeImageRef(...)` once this PR lands
+- `CreateSession` uses `resolveRuntimeImageRef(...)`
 - configuration docs describe `RUNTIME_IMAGE_REF` and production digest expectations
-
-Residual follow-on:
-- production deployments should set `RUNTIME_IMAGE_REF` to a pinned digest
-- EF-0003 still owns final dev/demo versus production-safe image posture cleanup
 
 ### EF-0003 — Stop advertising mutable tags as production-safe defaults
 Status:
-- **partially mitigated; still open for final production posture**
+- **completed baseline once this PR lands**
 
 Observed current state:
+- base deployment is explicitly dev/demo-oriented
 - production overlay guidance exists
+- production Kustomize overlay exists once this PR lands
+- production overlay sets digest-form gateway/runtime image refs via placeholders
 - pinned Tekton task variant exists
-- base deployment remains dev/demo-oriented
 
-Remaining follow-on:
-- continue separating dev/demo base manifests from production-safe overlays
-- keep production hardening docs and manifests aligned
+Residual follow-on:
+- release automation should eventually substitute real image digests into the production overlay
+- production deployment should compose the production overlay with an explicit k8s connector overlay
 
 ### EF-0004 — Resolve k8s connector credential model
 Status:
@@ -133,8 +132,8 @@ Observed current state:
 - placeholder public-key policy remains as compatibility/example path, not bundled default
 
 ## Suggested implementation order
-1. EF-0003
-2. EF-0009
+1. EF-0009
+2. production release automation follow-through for real digest substitution
 3. production hardening follow-through for EF-0010 where non-keyless trust material is required
 
 ## Working rule
