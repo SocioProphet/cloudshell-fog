@@ -17,9 +17,10 @@ As of the current `main` line:
 - Argo CD policy and Tekton application surfaces exist
 - policy root Kustomize selects the keyless Kyverno bundle
 - runtime image resolution uses the canonical resolver
-- production image pinning is represented by a concrete production Kustomize overlay once this PR lands
+- production image pinning is represented by a concrete production Kustomize overlay
+- per-session NetworkPolicies are applied by the Kubernetes connector once this PR lands
 
-That means EF-0001, EF-0002, EF-0003, EF-0004, EF-0005, EF-0006, EF-0007, EF-0008, and the keyless baseline portion of EF-0010 should now be read as completed baseline rather than outstanding work once this PR lands.
+That means EF-0001 through EF-0010 have an implemented baseline once this PR lands, except for residual production automation follow-through items explicitly noted below.
 
 ## Priority 0 — correctness / trust / deployability
 
@@ -47,12 +48,12 @@ Observed current state:
 
 ### EF-0003 — Stop advertising mutable tags as production-safe defaults
 Status:
-- **completed baseline once this PR lands**
+- **completed baseline on `main`**
 
 Observed current state:
 - base deployment is explicitly dev/demo-oriented
 - production overlay guidance exists
-- production Kustomize overlay exists once this PR lands
+- production Kustomize overlay exists
 - production overlay sets digest-form gateway/runtime image refs via placeholders
 - pinned Tekton task variant exists
 
@@ -115,11 +116,17 @@ Observed current state:
 
 ### EF-0009 — Turn per-session network policy from template to actual mechanism
 Status:
-- **still open**
+- **completed once this PR lands**
 
-Required outcome:
-- define how per-session namespaces get their policies applied
-- likely via runtime provisioning code or namespace bootstrap controller/job
+Observed current state:
+- Kubernetes connector creates a per-session namespace
+- Kubernetes connector applies default-deny, gateway-ingress, and DNS/HTTPS egress NetworkPolicies inside each session namespace
+- RBAC grants the gateway permission to manage NetworkPolicies
+- `deploy/k8s/networkpolicy.yaml` is retained as a reference/manual bootstrap artifact, not the primary runtime mechanism
+
+Residual follow-on:
+- add fake-client unit tests around NetworkPolicy object creation if/when connector tests are expanded
+- consider exposing policy creation failures as richer audit events
 
 ### EF-0010 — Complete signed-image verification trust material
 Status:
@@ -132,8 +139,8 @@ Observed current state:
 - placeholder public-key policy remains as compatibility/example path, not bundled default
 
 ## Suggested implementation order
-1. EF-0009
-2. production release automation follow-through for real digest substitution
+1. production release automation follow-through for real digest substitution
+2. optional connector fake-client tests for per-session NetworkPolicy creation
 3. production hardening follow-through for EF-0010 where non-keyless trust material is required
 
 ## Working rule
