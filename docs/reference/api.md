@@ -130,18 +130,29 @@ curl -s https://shell.example.com/v1/sessions/550e8400-e29b-41d4-a716-4466554400
 {
   "session_id": "550e8400-e29b-41d4-a716-446655440000",
   "status": "running",
-  "placement": "eu-west-1",
+  "placement": {
+    "region": "eu-west-1",
+    "node_id": "fog-node-1",
+    "tier": "fog",
+    "reasons": ["fog-preferred", "healthy", "capacity-ok"]
+  },
   "created_at": "2026-01-01T00:00:00Z",
-  "expires_at": "2026-01-01T01:00:00Z"
+  "expires_at": "2026-01-01T01:00:00Z",
+  "image_ref": "ghcr.io/socioprophet/cloudshell-runtime@sha256:abc123..."
 }
 ```
 
 | Field | Description |
 |---|---|
+| `session_id` | UUID identifying the session |
 | `status` | One of: `pending`, `running`, `terminated` |
-| `placement` | Region or node where the runtime is running |
+| `placement.region` | Region where the runtime was placed |
+| `placement.node_id` | Concrete runtime node selected for the session |
+| `placement.tier` | Placement trust tier such as `fog` or `cloud` |
+| `placement.reasons` | Stored decision reasons when available |
 | `created_at` | Session creation timestamp (RFC3339) |
 | `expires_at` | Session expiry timestamp (RFC3339) |
+| `image_ref` | Runtime image reference |
 
 **Error responses**
 

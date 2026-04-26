@@ -20,17 +20,20 @@ const (
 
 // Session holds all metadata for a single shell session.
 type Session struct {
-	ID           string
-	Subject      string
-	Status       Status
-	Profile      string
-	Placement    string
-	RuntimeRef   string // "<namespace>/<pod>"
-	ImageRef     string
-	TTLSeconds   int
-	CreatedAt    time.Time
-	ExpiresAt    time.Time
-	LastActiveAt time.Time
+	ID               string
+	Subject          string
+	Status           Status
+	Profile          string
+	Placement        string // legacy region-only placement field
+	PlacementNodeID  string
+	PlacementTier    string
+	PlacementReasons []string
+	RuntimeRef       string // "<namespace>/<pod>"
+	ImageRef         string
+	TTLSeconds       int
+	CreatedAt        time.Time
+	ExpiresAt        time.Time
+	LastActiveAt     time.Time
 }
 
 // ErrNotFound is returned when a session cannot be found.
