@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/SocioProphet/cloudshell-fog/internal/placement"
+	"github.com/SocioProphet/cloudshell-fog/internal/session"
 )
 
 // PlacementResponse is a richer placement payload than the current region-only
@@ -31,6 +32,16 @@ type CreateSessionResponseVNext struct {
 	Placement PlacementResponse `json:"placement"`
 }
 
+// SessionStatusResponseVNext is a richer response envelope for session status.
+type SessionStatusResponseVNext struct {
+	SessionID string            `json:"session_id"`
+	Status    string            `json:"status"`
+	Placement PlacementResponse `json:"placement"`
+	CreatedAt string            `json:"created_at"`
+	ExpiresAt string            `json:"expires_at"`
+	ImageRef  string            `json:"image_ref"`
+}
+
 // BuildCreateSessionResponseVNext converts the current placement engine decision
 // plus attach material into a richer response payload.
 func BuildCreateSessionResponseVNext(sessionID, gatewayURL, token string, tokenExpiresAt time.Time, decision placement.Decision) CreateSessionResponseVNext {
@@ -47,5 +58,23 @@ func BuildCreateSessionResponseVNext(sessionID, gatewayURL, token string, tokenE
 			Tier:    string(decision.Tier),
 			Reasons: append([]string(nil), decision.Reasons...),
 		},
+	}
+}
+
+// BuildSessionStatusResponseVNext converts stored session placement metadata into
+// a richer response payload for GET /v1/sessions/{id}.
+func BuildSessionStatusResponseVNext(sess *session.Session) SessionStatusResponseVNext {
+	return SessionStatusResponseVNext{
+		SessionID: sess.ID,
+		Status:    string(sess.Status),
+		Placement: PlacementResponse{
+			Region:  sess.Placement,
+			NodeID:  sess.PlacementNodeID,
+			Tier:    sess.PlacementTier,
+			Reasons: append([]string(nil), sess.PlacementReasons...),
+		},
+		CreatedAt: sess.CreatedAt.UTC().Format(time.RFC3339),
+		ExpiresAt: sess.ExpiresAt.UTC().Format(time.RFC3339),
+		ImageRef:  sess.ImageRef,
 	}
 }
