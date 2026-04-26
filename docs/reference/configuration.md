@@ -19,20 +19,31 @@ This document is the complete reference for all cloudshell-fog configuration opt
 | `OIDC_CLIENT_ID` | _(unset)_ | OAuth 2.0 client ID. Must match the `aud` claim in access tokens. |
 | `SESSION_TOKEN_SIGNING_KEY` | _(random 32 bytes per restart)_ | Hex-encoded HMAC key (minimum 32 bytes) used to mint and verify short-lived session tokens. If left unset, a random key is generated at startup — this invalidates all session tokens on pod restart. **Always set this in production via a Kubernetes Secret.** |
 
+### Runtime image
+
+| Variable | Default | Description |
+|---|---|---|
+| `RUNTIME_IMAGE_REF` | `ghcr.io/socioprophet/cloudshell-fog/runtime:dev` | Default OCI image used for shell runtimes when callers omit `image_ref`. Explicit API request `image_ref` values still take precedence. Production deployments should set this to a pinned digest image reference. |
+
 ### Connectors
 
 | Variable | Default | Description |
 |---|---|---|
-| `USE_STUB_CONNECTOR` | _(unset)_ | Set to `1` to use the no-op stub connector. The stub opens a `/bin/sh` process on the gateway host for each session. **Development and testing only.** |
-| `USE_K8S` | _(unset)_ | Set to `1` to use the Kubernetes runtime connector. The connector creates a per-session namespace and pod. Requires the gateway to run with the RBAC permissions in `deploy/k8s/rbac.yaml`. |
+| `CONNECTOR_MODE` | `stub` | Runtime connector mode. Supported values are `stub` and `k8s`. Unsupported values fail fast at gateway startup. |
+| `KUBECONFIG` | _(unset)_ | Optional kubeconfig path used when `CONNECTOR_MODE=k8s`. If unset in k8s mode, the gateway attempts in-cluster Kubernetes config. |
 
-If neither variable is set, the gateway defaults to the stub connector and logs a warning.
+Connector behavior:
+
+- `CONNECTOR_MODE=stub` is the development/demo posture and does not provision Kubernetes-backed runtime pods.
+- `CONNECTOR_MODE=k8s` provisions runtimes through the Kubernetes connector and requires either a mounted kubeconfig or in-cluster credentials.
+- Use `deploy/k8s/overlays/k8s-connector-incluster/` when the gateway runs inside the target cluster and should use ServiceAccount credentials.
+- Use `deploy/k8s/overlays/k8s-connector-kubeconfig/` when the gateway should use a mounted kubeconfig secret.
 
 ### Placement
 
 | Variable | Default | Description |
 |---|---|---|
-| `CLOUD_FALLBACK_REGION` | `us-east-1` | Region identifier used for placement when no fog nodes are available or healthy. This value is returned as the `placement` field in session responses. |
+| `CLOUD_FALLBACK_REGION` | `us-east-1` | Region identifier used for placement when no fog nodes are available or healthy. This value appears as `placement.region` in session responses. |
 
 ### Policy
 
@@ -145,7 +156,9 @@ GATEWAY_URL=wss://shell.example.com
 OIDC_ISSUER_URL=https://accounts.example.com
 OIDC_CLIENT_ID=cloudshell-gateway
 SESSION_TOKEN_SIGNING_KEY=<from secret manager>
-USE_K8S=1
+CONNECTOR_MODE=k8s
+KUBECONFIG=<optional mounted kubeconfig path if not using in-cluster config>
+RUNTIME_IMAGE_REF=ghcr.io/socioprophet/cloudshell-fog/runtime@sha256:<digest>
 CLOUD_FALLBACK_REGION=us-east-1
 POLICY_CONFIG=/etc/cloudshell/policy.yaml
 ```
