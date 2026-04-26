@@ -1,23 +1,30 @@
+# Reference NetworkPolicy set for cloudshell session namespaces.
+#
+# Runtime behavior:
+# - KubernetesConnector creates equivalent NetworkPolicy objects inside each
+#   per-session namespace before creating the shell pod.
+# - This manifest remains as an operator reference and manual bootstrap aid.
+# - Do not apply this file directly to cloudshell-system expecting it to secure
+#   per-session namespaces; the session namespace name is dynamic.
+---
 # Deny all ingress/egress for session pods by default.
-# Each session namespace should apply this policy.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: default-deny-all
-  # Apply this to every cloudshell-<sessionID> namespace at provisioning time.
-  namespace: cloudshell-system  # template — apply per session namespace
+  namespace: cloudshell-session-example
 spec:
   podSelector: {}
   policyTypes:
     - Ingress
     - Egress
 ---
-# Allow gateway → session pod (PTY exec traffic via k8s API server).
+# Allow gateway -> session pod ingress.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: allow-gateway-to-shell
-  namespace: cloudshell-system
+  namespace: cloudshell-session-example
 spec:
   podSelector:
     matchLabels:
@@ -33,12 +40,12 @@ spec:
             matchLabels:
               app: cloudshell-gateway
 ---
-# Allow limited egress from session pods (DNS + HTTPS only).
+# Allow limited egress from session pods: DNS and HTTPS only.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: allow-shell-egress
-  namespace: cloudshell-system
+  namespace: cloudshell-session-example
 spec:
   podSelector:
     matchLabels:
@@ -52,7 +59,7 @@ spec:
           protocol: UDP
         - port: 53
           protocol: TCP
-    # HTTPS (package installs, etc.)
+    # HTTPS
     - ports:
         - port: 443
           protocol: TCP
