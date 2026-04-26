@@ -4,7 +4,6 @@ info:
   version: "1.0.0"
   description: |
     OpenAPI schema for the currently implemented session lifecycle API.
-    This schema is intentionally aligned to the reviewed implementation rather than a richer future placement object.
 servers:
   - url: https://shell.example.com
 paths:
@@ -123,6 +122,20 @@ components:
         expires_at:
           type: string
           format: date-time
+    PlacementInfo:
+      type: object
+      required: [region, node_id, tier]
+      properties:
+        region:
+          type: string
+        node_id:
+          type: string
+        tier:
+          type: string
+        reasons:
+          type: array
+          items:
+            type: string
     CreateSessionResponse:
       type: object
       required: [session_id, attach, placement]
@@ -132,17 +145,18 @@ components:
         attach:
           $ref: '#/components/schemas/AttachInfo'
         placement:
-          type: string
-          description: Current implementation returns the selected region as a string.
+          $ref: '#/components/schemas/PlacementInfo'
     GetSessionResponse:
       type: object
-      required: [status, placement, created_at, expires_at, image_ref]
+      required: [session_id, status, placement, created_at, expires_at, image_ref]
       properties:
+        session_id:
+          type: string
         status:
           type: string
           enum: [pending, running, terminated, expired]
         placement:
-          type: string
+          $ref: '#/components/schemas/PlacementInfo'
         created_at:
           type: string
           format: date-time
