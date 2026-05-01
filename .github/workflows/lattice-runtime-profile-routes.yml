@@ -1,0 +1,28 @@
+name: lattice-runtime-profile-routes
+
+on:
+  pull_request:
+    paths:
+      - "fixtures/lattice-data-governai/runtime-profile-routes.v0.1.json"
+      - "tools/validate_lattice_runtime_profile_routes.py"
+      - ".github/workflows/lattice-runtime-profile-routes.yml"
+      - "Makefile"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-lattice-runtime-profile-routes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate Lattice runtime profile routes
+        run: python tools/validate_lattice_runtime_profile_routes.py
