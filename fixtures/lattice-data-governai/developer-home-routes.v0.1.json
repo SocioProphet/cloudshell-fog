@@ -1,0 +1,148 @@
+{
+  "apiVersion": "cloudshell.socioprophet.dev/v0",
+  "kind": "LatticeDeveloperHomeRoutesFixture",
+  "metadata": {
+    "name": "lattice-data-governai-developer-home-routes",
+    "version": "0.1.0",
+    "description": "Governed Fog Shell / Developer Home command routes for Lattice Studio/Data/GovernAI assets."
+  },
+  "sourceRefs": {
+    "umbrellaIssue": "SocioProphet/prophet-platform#291",
+    "platformPr": "SocioProphet/prophet-platform#299",
+    "runtimePr": "SocioProphet/lattice-forge#10",
+    "mlopsPr": "SocioProphet/prophet-platform-fabric-mlops-ts-suite#33",
+    "policyPr": "SocioProphet/policy-fabric#39",
+    "topologyPr": "SocioProphet/sociosphere#238",
+    "sherlockPr": "SocioProphet/sherlock-search#30",
+    "slashTopicsPr": "SocioProphet/slash-topics#23",
+    "newHopePr": "SocioProphet/new-hope#7",
+    "agentplanePr": "SocioProphet/agentplane#76"
+  },
+  "surfaceModel": {
+    "shellSurface": "cloudshell-fog",
+    "developerHomeSurface": "fog-shell-command-palette",
+    "mustRouteThroughPolicyFabric": true,
+    "mustRouteThroughAgentPlaneForExecution": true,
+    "mustPreservePlatformAssetRecordIdentity": true,
+    "mustNotBypassSlashTopicsOrNewHope": true
+  },
+  "assets": {
+    "dataProductRef": "urn:srcos:data-product:community_truth_demo",
+    "runtimeAssetRef": "runtime-asset:prophet-python-ml:0.1.0",
+    "notebookSessionRef": "notebook-session:community-truth-demo",
+    "queryRunRef": "query-run:community-truth-demo:001",
+    "evaluationBundleRef": "urn:srcos:evaluation-bundle:community_truth_demo_model_eval",
+    "factsheetRef": "urn:srcos:factsheet:community_truth_demo_model",
+    "publicationArtifactRef": "urn:srcos:publication-artifact:community_truth_demo_report",
+    "policyPackRef": "SocioProphet/policy-fabric#39",
+    "agentplaneReplayRef": "SocioProphet/agentplane#76",
+    "topicPackRef": "slash-topics://packs/lattice-data-governai@0.1.0",
+    "semanticMembraneRef": "newhope://membranes/lattice-data-governai-admission@0.1.0"
+  },
+  "commands": [
+    {
+      "id": "lattice.catalog.search.community-truth-demo",
+      "label": "Search Lattice catalog assets",
+      "slashCommand": "/lattice data search community_truth_demo",
+      "route": "sherlock-search",
+      "action": "discover",
+      "assetRef": "urn:srcos:data-product:community_truth_demo",
+      "policyRef": "urn:srcos:policy:lattice-data-product-demo",
+      "evidenceCorrelationId": "urn:srcos:evidence:community_truth_demo_data_product",
+      "requires": ["sherlock-index", "slash-topic-scope"],
+      "resultMode": "read-only"
+    },
+    {
+      "id": "lattice.data.inspect.community-truth-demo",
+      "label": "Inspect DataProduct contract, trust, license, and quality",
+      "slashCommand": "/lattice data inspect urn:srcos:data-product:community_truth_demo",
+      "route": "prophet-platform",
+      "action": "inspect-data-product",
+      "assetRef": "urn:srcos:data-product:community_truth_demo",
+      "policyRef": "urn:srcos:policy:lattice-data-product-demo",
+      "evidenceCorrelationId": "urn:srcos:evidence:community_truth_demo_data_product",
+      "requires": ["DataProduct", "DataContract", "QualityProfile", "PolicyFabric"],
+      "resultMode": "read-only"
+    },
+    {
+      "id": "lattice.runtime.pick.prophet-python-ml",
+      "label": "Pick governed RuntimeAsset",
+      "slashCommand": "/lattice runtime pick prophet-python-ml",
+      "route": "lattice-forge",
+      "action": "select-runtime",
+      "assetRef": "runtime-asset:prophet-python-ml:0.1.0",
+      "policyRef": "policy://runtime/prophet-python-ml-demo",
+      "evidenceCorrelationId": "urn:srcos:evidence:runtime-prophet-python-ml-demo",
+      "requires": ["RuntimeAsset", "SBOM", "signature", "scan", "policy-gate"],
+      "resultMode": "read-only"
+    },
+    {
+      "id": "lattice.notebook.launch.community-truth-demo",
+      "label": "Launch governed notebook session",
+      "slashCommand": "/lattice notebook launch community_truth_demo --runtime prophet-python-ml",
+      "route": "agentplane",
+      "action": "run-notebook-dry-run",
+      "assetRef": "notebook-session:community-truth-demo",
+      "policyRef": "urn:srcos:policy:lattice-studio-demo",
+      "evidenceCorrelationId": "urn:srcos:evidence:agentplane-lattice-data-governai-stdout",
+      "requires": ["PolicyFabric", "RuntimeAsset", "DataProduct", "AgentPlane", "NewHopeMembrane"],
+      "resultMode": "execution-dry-run"
+    },
+    {
+      "id": "lattice.mlops.run.ray-beam-demo",
+      "label": "Run governed Ray/Beam dry-run plan",
+      "slashCommand": "/lattice mlops run community_truth_demo --dry-run",
+      "route": "agentplane",
+      "action": "run-governed-mlops-dry-run",
+      "assetRef": "rayjob:community-truth-demo-train:0001",
+      "policyRef": "urn:srcos:policy:mlops-governed-execution-demo",
+      "evidenceCorrelationId": "urn:srcos:evidence:ray-community-truth-demo-0001",
+      "requires": ["PolicyFabric", "AgentPlane", "RuntimeAsset", "RayJobDryRunPlan", "BeamPipelineDryRunPlan"],
+      "resultMode": "execution-dry-run"
+    },
+    {
+      "id": "lattice.govern.review.model-eval",
+      "label": "Review model evaluation and factsheet",
+      "slashCommand": "/lattice govern review urn:srcos:evaluation-bundle:community_truth_demo_model_eval",
+      "route": "policy-fabric",
+      "action": "review-required",
+      "assetRef": "urn:srcos:evaluation-bundle:community_truth_demo_model_eval",
+      "policyRef": "urn:srcos:policy:model-eval-demo",
+      "evidenceCorrelationId": "urn:srcos:evidence:community_truth_demo_model_eval",
+      "requires": ["EvaluationBundle", "Factsheet", "PolicyFabric", "NewHopeMembrane"],
+      "resultMode": "approval-workflow"
+    },
+    {
+      "id": "lattice.publication.inspect.report",
+      "label": "Inspect reproducible publication package",
+      "slashCommand": "/lattice publication inspect urn:srcos:publication-artifact:community_truth_demo_report",
+      "route": "prophet-platform",
+      "action": "inspect-publication",
+      "assetRef": "urn:srcos:publication-artifact:community_truth_demo_report",
+      "policyRef": "urn:srcos:policy:publication-review-demo",
+      "evidenceCorrelationId": "urn:srcos:evidence:community_truth_demo_report",
+      "requires": ["PublicationArtifact", "EvidenceBundle", "ReviewWorkflow", "PolicyFabric"],
+      "resultMode": "read-only"
+    },
+    {
+      "id": "lattice.publication.export.report.blocked",
+      "label": "Attempt publication export, blocked while under review",
+      "slashCommand": "/lattice publication export urn:srcos:publication-artifact:community_truth_demo_report",
+      "route": "policy-fabric",
+      "action": "export-artifact",
+      "assetRef": "urn:srcos:publication-artifact:community_truth_demo_report",
+      "policyRef": "urn:srcos:policy:publication-review-demo",
+      "evidenceCorrelationId": "urn:srcos:evidence:community_truth_demo_report",
+      "requires": ["PolicyFabric", "NewHopeMembrane", "review.accepted"],
+      "resultMode": "denied"
+    }
+  ],
+  "safety": {
+    "fixtureOnly": true,
+    "hostMutation": false,
+    "network": "none",
+    "secrets": "none",
+    "runtimeConnectorBypassAllowed": false,
+    "policyBypassAllowed": false
+  }
+}
