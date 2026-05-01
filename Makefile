@@ -1,4 +1,4 @@
-.PHONY: build test lint vet frontend docker-build run-dev help
+.PHONY: build test lint vet frontend docker-build run-dev help validate validate-lattice-data-governai-routes
 
 ## help: show this help message
 help:
@@ -18,6 +18,12 @@ vet:
 
 ## lint: run go vet (extend with golangci-lint if available)
 lint: vet
+
+## validate: validate fixture contracts
+validate: validate-lattice-data-governai-routes
+
+validate-lattice-data-governai-routes:
+	python3 tools/validate_lattice_data_governai_routes.py
 
 ## frontend: install npm deps and build the web UI bundle
 frontend:
