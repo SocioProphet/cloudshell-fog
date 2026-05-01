@@ -1,0 +1,131 @@
+{
+  "apiVersion": "cloudshell.socioprophet.dev/v0",
+  "kind": "LatticeRuntimeProfileRoutesFixture",
+  "metadata": {
+    "name": "lattice-runtime-profile-routes",
+    "version": "0.1.0",
+    "description": "Governed Fog Shell / Developer Home command routes for Lattice notebook, Ray, and Beam RuntimeAsset profiles."
+  },
+  "sourceRefs": {
+    "umbrellaIssue": "SocioProphet/prophet-platform#291",
+    "runtimeForgePr": "SocioProphet/lattice-forge#11",
+    "platformRuntimeCatalogPr": "SocioProphet/prophet-platform#306",
+    "agentplaneRuntimeRefsPr": "SocioProphet/agentplane#77",
+    "topologyRuntimePr": "SocioProphet/sociosphere#240",
+    "sherlockRuntimeIndexPr": "SocioProphet/sherlock-search#32",
+    "slashRuntimeTopicPr": "SocioProphet/slash-topics#25",
+    "newHopeRuntimeMembranePr": "SocioProphet/new-hope#9",
+    "policyRuntimePr": "SocioProphet/policy-fabric#41"
+  },
+  "runtimeRefs": {
+    "notebookRuntimeRef": "runtime-asset:prophet-python-ml:0.1.0",
+    "rayRuntimeRef": "runtime-asset:prophet-ray-ml:0.1.0",
+    "beamRuntimeRef": "runtime-asset:prophet-beam-dataops:0.1.0",
+    "runtimeProfileBindingRef": "runtime-profile-binding:lattice-data-governai:0.1.0"
+  },
+  "surfaceModel": {
+    "shellSurface": "cloudshell-fog",
+    "developerHomeSurface": "fog-shell-command-palette",
+    "mustRouteThroughPolicyFabric": true,
+    "mustRouteThroughAgentPlaneForExecution": true,
+    "mustPreserveRuntimeAssetRefs": true,
+    "mustNotBypassSlashTopicsOrNewHope": true
+  },
+  "commands": [
+    {
+      "id": "lattice.runtime.pick.notebook",
+      "label": "Pick notebook runtime",
+      "slashCommand": "/lattice runtime pick prophet-python-ml",
+      "route": "lattice-forge",
+      "action": "select-runtime",
+      "assetRef": "runtime-asset:prophet-python-ml:0.1.0",
+      "policyRef": "policy://runtime/prophet-python-ml-demo",
+      "evidenceCorrelationId": "urn:srcos:evidence:runtime-prophet-python-ml-demo",
+      "requires": ["RuntimeAsset", "RuntimeProfileBinding", "PolicyFabric", "SlashTopics", "NewHopeMembrane"],
+      "resultMode": "read-only"
+    },
+    {
+      "id": "lattice.runtime.pick.ray",
+      "label": "Pick Ray ML runtime",
+      "slashCommand": "/lattice runtime pick prophet-ray-ml",
+      "route": "lattice-forge",
+      "action": "select-runtime",
+      "assetRef": "runtime-asset:prophet-ray-ml:0.1.0",
+      "policyRef": "policy://runtime/prophet-ray-ml-demo",
+      "evidenceCorrelationId": "urn:srcos:evidence:runtime-prophet-ray-ml-demo",
+      "requires": ["RuntimeAsset", "RuntimeProfileBinding", "PolicyFabric", "SlashTopics", "NewHopeMembrane"],
+      "resultMode": "read-only"
+    },
+    {
+      "id": "lattice.runtime.pick.beam",
+      "label": "Pick Beam DataOps runtime",
+      "slashCommand": "/lattice runtime pick prophet-beam-dataops",
+      "route": "lattice-forge",
+      "action": "select-runtime",
+      "assetRef": "runtime-asset:prophet-beam-dataops:0.1.0",
+      "policyRef": "policy://runtime/prophet-beam-dataops-demo",
+      "evidenceCorrelationId": "urn:srcos:evidence:runtime-prophet-beam-dataops-demo",
+      "requires": ["RuntimeAsset", "RuntimeProfileBinding", "PolicyFabric", "SlashTopics", "NewHopeMembrane"],
+      "resultMode": "read-only"
+    },
+    {
+      "id": "lattice.runtime.bindings.inspect",
+      "label": "Inspect runtime profile bindings",
+      "slashCommand": "/lattice runtime bindings inspect",
+      "route": "prophet-platform",
+      "action": "inspect-runtime-profile-bindings",
+      "assetRef": "runtime-profile-binding:lattice-data-governai:0.1.0",
+      "policyRef": "urn:srcos:policy:lattice-runtime-profile-bindings-demo",
+      "evidenceCorrelationId": "urn:srcos:evidence:lattice-runtime-profile-bindings-demo",
+      "requires": ["RuntimeProfileBinding", "PolicyFabric", "AgentPlane", "SocioSphere"],
+      "resultMode": "read-only"
+    },
+    {
+      "id": "lattice.notebook.launch.with-profile",
+      "label": "Launch notebook with notebook runtime profile",
+      "slashCommand": "/lattice notebook launch community_truth_demo --runtime prophet-python-ml",
+      "route": "agentplane",
+      "action": "run-notebook-dry-run",
+      "assetRef": "notebook-session:community-truth-demo",
+      "runtimeRef": "runtime-asset:prophet-python-ml:0.1.0",
+      "policyRef": "urn:srcos:policy:lattice-studio-demo",
+      "evidenceCorrelationId": "urn:srcos:evidence:agentplane-lattice-data-governai-stdout",
+      "requires": ["RuntimeProfileBinding", "PolicyFabric", "AgentPlane", "NewHopeMembrane"],
+      "resultMode": "execution-dry-run"
+    },
+    {
+      "id": "lattice.mlops.ray.run.with-profile",
+      "label": "Run Ray dry-run with Ray runtime profile",
+      "slashCommand": "/lattice mlops ray run community_truth_demo --runtime prophet-ray-ml --dry-run",
+      "route": "agentplane",
+      "action": "run-ray-runtime",
+      "assetRef": "rayjob:community-truth-demo-train:0001",
+      "runtimeRef": "runtime-asset:prophet-ray-ml:0.1.0",
+      "policyRef": "urn:srcos:policy:mlops-governed-execution-demo",
+      "evidenceCorrelationId": "urn:srcos:evidence:ray-community-truth-demo-0001",
+      "requires": ["RuntimeProfileBinding", "PolicyFabric", "AgentPlane", "RayJobDryRunPlan", "NewHopeMembrane"],
+      "resultMode": "execution-dry-run"
+    },
+    {
+      "id": "lattice.dataops.beam.run.with-profile",
+      "label": "Run Beam dry-run with Beam runtime profile",
+      "slashCommand": "/lattice dataops beam run community_truth_demo --runtime prophet-beam-dataops --dry-run",
+      "route": "agentplane",
+      "action": "run-beam-runtime",
+      "assetRef": "beam:community-truth-demo-quality:0001",
+      "runtimeRef": "runtime-asset:prophet-beam-dataops:0.1.0",
+      "policyRef": "urn:srcos:policy:mlops-governed-execution-demo",
+      "evidenceCorrelationId": "urn:srcos:evidence:beam-community-truth-demo-0001",
+      "requires": ["RuntimeProfileBinding", "PolicyFabric", "AgentPlane", "BeamPipelineDryRunPlan", "NewHopeMembrane"],
+      "resultMode": "execution-dry-run"
+    }
+  ],
+  "safety": {
+    "fixtureOnly": true,
+    "hostMutation": false,
+    "network": "none",
+    "secrets": "none",
+    "runtimeConnectorBypassAllowed": false,
+    "policyBypassAllowed": false
+  }
+}
