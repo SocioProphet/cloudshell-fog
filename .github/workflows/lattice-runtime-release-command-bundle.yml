@@ -1,0 +1,28 @@
+name: lattice-runtime-release-command-bundle
+
+on:
+  pull_request:
+    paths:
+      - "fixtures/lattice-data-governai/runtime-release-command-bundle.v0.1.json"
+      - "tools/validate_lattice_runtime_release_command_bundle.py"
+      - ".github/workflows/lattice-runtime-release-command-bundle.yml"
+      - "Makefile"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-lattice-runtime-release-command-bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate Lattice runtime release command bundle
+        run: python tools/validate_lattice_runtime_release_command_bundle.py
