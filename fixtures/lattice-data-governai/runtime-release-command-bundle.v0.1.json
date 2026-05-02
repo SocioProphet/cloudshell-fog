@@ -1,0 +1,66 @@
+{
+  "apiVersion": "cloudshell.socioprophet.dev/v0",
+  "kind": "LatticeRuntimeReleaseCommandBundleFixture",
+  "metadata": {
+    "name": "lattice-runtime-release-command-bundle",
+    "version": "0.1.0",
+    "description": "Fog Shell command bundle for inspecting runtime release readiness after evidence gates are attached."
+  },
+  "sourceRefs": {
+    "runtimeEvidencePr": "SocioProphet/lattice-forge#13",
+    "runtimePolicyPr": "SocioProphet/policy-fabric#43",
+    "platformRuntimeReleaseReadinessPr": "SocioProphet/prophet-platform#308"
+  },
+  "manifestRef": "runtime-promotion-manifest:lattice-runtime-promotion-manifest:0.2.0",
+  "runtimeRefs": [
+    "runtime-asset:prophet-python-ml:0.1.0",
+    "runtime-asset:prophet-ray-ml:0.1.0",
+    "runtime-asset:prophet-beam-dataops:0.1.0"
+  ],
+  "commands": [
+    {
+      "step": 1,
+      "id": "runtime.release.manifest.inspect",
+      "command": "/lattice runtime release manifest inspect --manifest lattice-runtime-promotion-manifest:0.2.0",
+      "route": "lattice-forge",
+      "expectedMode": "read-only",
+      "expectedOutput": {
+        "status": "ok",
+        "manifestRef": "runtime-promotion-manifest:lattice-runtime-promotion-manifest:0.2.0",
+        "contains": ["external-scanner-evidence", "external-signing-authority-evidence", "human-approval"]
+      }
+    },
+    {
+      "step": 2,
+      "id": "runtime.release.policy.inspect",
+      "command": "/lattice runtime release policy inspect --manifest lattice-runtime-promotion-manifest:0.2.0",
+      "route": "policy-fabric",
+      "expectedMode": "read-only",
+      "expectedOutput": {
+        "status": "ok",
+        "policyRef": "SocioProphet/policy-fabric#43",
+        "decision": "allow-with-required-evidence"
+      }
+    },
+    {
+      "step": 3,
+      "id": "runtime.release.readiness.inspect",
+      "command": "/lattice runtime release readiness inspect",
+      "route": "prophet-platform",
+      "expectedMode": "read-only",
+      "expectedOutput": {
+        "status": "ok",
+        "readinessRef": "SocioProphet/prophet-platform#308",
+        "manifestRef": "runtime-promotion-manifest:lattice-runtime-promotion-manifest:0.2.0"
+      }
+    }
+  ],
+  "validationRequirements": {
+    "requireSequentialSteps": true,
+    "requireManifestV020": true,
+    "requirePolicyFabricForReleaseDecision": true,
+    "requireAllRuntimeRefs": true,
+    "requireNoNetworkSecretsOrHostMutation": true
+  },
+  "safety": {"network": "none", "secrets": "none", "hostMutation": false}
+}
