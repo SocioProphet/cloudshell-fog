@@ -1,4 +1,4 @@
-.PHONY: build test lint vet frontend docker-build run-dev help validate validate-lattice-data-governai-routes validate-lattice-runtime-profile-routes
+.PHONY: build test lint vet frontend docker-build run-dev help validate validate-lattice-data-governai-routes validate-lattice-runtime-profile-routes validate-lattice-demo-command-bundle
 
 ## help: show this help message
 help:
@@ -20,13 +20,16 @@ vet:
 lint: vet
 
 ## validate: validate fixture contracts
-validate: validate-lattice-data-governai-routes validate-lattice-runtime-profile-routes
+validate: validate-lattice-data-governai-routes validate-lattice-runtime-profile-routes validate-lattice-demo-command-bundle
 
 validate-lattice-data-governai-routes:
 	python3 tools/validate_lattice_data_governai_routes.py
 
 validate-lattice-runtime-profile-routes:
 	python3 tools/validate_lattice_runtime_profile_routes.py
+
+validate-lattice-demo-command-bundle:
+	python3 tools/validate_lattice_demo_command_bundle.py
 
 ## frontend: install npm deps and build the web UI bundle
 frontend:

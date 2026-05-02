@@ -1,0 +1,185 @@
+{
+  "apiVersion": "cloudshell.socioprophet.dev/v0",
+  "kind": "LatticeDemoCommandBundleFixture",
+  "metadata": {
+    "name": "lattice-demo-command-bundle",
+    "version": "0.1.0",
+    "description": "Executable Fog Shell / Developer Home command sequence for the Lattice Studio/Data/GovernAI demo path."
+  },
+  "sourceRefs": {
+    "umbrellaIssue": "SocioProphet/prophet-platform#291",
+    "demoReadinessPr": "SocioProphet/prophet-platform#307",
+    "demoReadinessTopologyPr": "SocioProphet/sociosphere#244",
+    "runtimeForgePr": "SocioProphet/lattice-forge#11",
+    "runtimePromotionPr": "SocioProphet/lattice-forge#12",
+    "policyRuntimePromotionPr": "SocioProphet/policy-fabric#42",
+    "agentplaneRuntimeRefsPr": "SocioProphet/agentplane#77",
+    "runtimeRoutesPr": "SocioProphet/cloudshell-fog#31"
+  },
+  "runtimeRefs": {
+    "notebookRuntimeRef": "runtime-asset:prophet-python-ml:0.1.0",
+    "rayRuntimeRef": "runtime-asset:prophet-ray-ml:0.1.0",
+    "beamRuntimeRef": "runtime-asset:prophet-beam-dataops:0.1.0",
+    "runtimeProfileBindingRef": "runtime-profile-binding:lattice-data-governai:0.1.0",
+    "runtimePromotionManifestRef": "runtime-promotion-manifest:lattice-runtime-promotion-manifest:0.1.0"
+  },
+  "demoState": {
+    "readiness": "demo-ready",
+    "network": "none",
+    "secrets": "none",
+    "hostMutation": false,
+    "devRuntimePromotion": "allowed-with-generated-evidence",
+    "stableRuntimePromotion": "blocked-pending-external-evidence"
+  },
+  "commands": [
+    {
+      "step": 1,
+      "id": "demo.catalog.search",
+      "command": "/lattice data search community_truth_demo",
+      "route": "sherlock-search",
+      "expectedMode": "read-only",
+      "expectedOutput": {
+        "status": "ok",
+        "contains": ["urn:srcos:data-product:community_truth_demo", "runtime-asset:prophet-python-ml:0.1.0", "runtime-asset:prophet-ray-ml:0.1.0", "runtime-asset:prophet-beam-dataops:0.1.0"]
+      }
+    },
+    {
+      "step": 2,
+      "id": "demo.runtime.pick.notebook",
+      "command": "/lattice runtime pick prophet-python-ml",
+      "route": "lattice-forge",
+      "expectedMode": "read-only",
+      "expectedOutput": {
+        "status": "ok",
+        "assetRef": "runtime-asset:prophet-python-ml:0.1.0",
+        "policyRef": "policy://runtime/prophet-python-ml-demo"
+      }
+    },
+    {
+      "step": 3,
+      "id": "demo.runtime.pick.ray",
+      "command": "/lattice runtime pick prophet-ray-ml",
+      "route": "lattice-forge",
+      "expectedMode": "read-only",
+      "expectedOutput": {
+        "status": "ok",
+        "assetRef": "runtime-asset:prophet-ray-ml:0.1.0",
+        "policyRef": "policy://runtime/prophet-ray-ml-demo"
+      }
+    },
+    {
+      "step": 4,
+      "id": "demo.runtime.pick.beam",
+      "command": "/lattice runtime pick prophet-beam-dataops",
+      "route": "lattice-forge",
+      "expectedMode": "read-only",
+      "expectedOutput": {
+        "status": "ok",
+        "assetRef": "runtime-asset:prophet-beam-dataops:0.1.0",
+        "policyRef": "policy://runtime/prophet-beam-dataops-demo"
+      }
+    },
+    {
+      "step": 5,
+      "id": "demo.runtime.bindings.inspect",
+      "command": "/lattice runtime bindings inspect",
+      "route": "prophet-platform",
+      "expectedMode": "read-only",
+      "expectedOutput": {
+        "status": "ok",
+        "assetRef": "runtime-profile-binding:lattice-data-governai:0.1.0",
+        "containsRuntimeRefs": ["runtime-asset:prophet-python-ml:0.1.0", "runtime-asset:prophet-ray-ml:0.1.0", "runtime-asset:prophet-beam-dataops:0.1.0"]
+      }
+    },
+    {
+      "step": 6,
+      "id": "demo.notebook.launch",
+      "command": "/lattice notebook launch community_truth_demo --runtime prophet-python-ml",
+      "route": "agentplane",
+      "expectedMode": "execution-dry-run",
+      "expectedOutput": {
+        "status": "success",
+        "runtimeRef": "runtime-asset:prophet-python-ml:0.1.0",
+        "evidenceRef": "urn:srcos:evidence:agentplane-lattice-data-governai-stdout"
+      }
+    },
+    {
+      "step": 7,
+      "id": "demo.annotation.training.inspect",
+      "command": "/lattice data inspect urn:srcos:data-product:community_truth_demo",
+      "route": "prophet-platform",
+      "expectedMode": "read-only",
+      "expectedOutput": {
+        "status": "ok",
+        "contains": ["urn:srcos:dataset:community_truth_demo_training", "urn:srcos:dataset:community_truth_demo_evaluation", "urn:srcos:annotation-reliability:community_truth_demo"]
+      }
+    },
+    {
+      "step": 8,
+      "id": "demo.ray.run",
+      "command": "/lattice mlops ray run community_truth_demo --runtime prophet-ray-ml --dry-run",
+      "route": "agentplane",
+      "expectedMode": "execution-dry-run",
+      "expectedOutput": {
+        "status": "success",
+        "runtimeRef": "runtime-asset:prophet-ray-ml:0.1.0",
+        "evidenceRef": "urn:srcos:evidence:ray-community-truth-demo-0001"
+      }
+    },
+    {
+      "step": 9,
+      "id": "demo.beam.run",
+      "command": "/lattice dataops beam run community_truth_demo --runtime prophet-beam-dataops --dry-run",
+      "route": "agentplane",
+      "expectedMode": "execution-dry-run",
+      "expectedOutput": {
+        "status": "success",
+        "runtimeRef": "runtime-asset:prophet-beam-dataops:0.1.0",
+        "evidenceRef": "urn:srcos:evidence:beam-community-truth-demo-0001"
+      }
+    },
+    {
+      "step": 10,
+      "id": "demo.govern.review",
+      "command": "/lattice govern review urn:srcos:evaluation-bundle:community_truth_demo_model_eval",
+      "route": "policy-fabric",
+      "expectedMode": "approval-workflow",
+      "expectedOutput": {
+        "status": "needs-review",
+        "policyRef": "urn:srcos:policy:model-eval-demo",
+        "evidenceRef": "urn:srcos:evidence:community_truth_demo_model_eval"
+      }
+    },
+    {
+      "step": 11,
+      "id": "demo.publication.inspect",
+      "command": "/lattice publication inspect urn:srcos:publication-artifact:community_truth_demo_report",
+      "route": "prophet-platform",
+      "expectedMode": "read-only",
+      "expectedOutput": {
+        "status": "under-review",
+        "contains": ["urn:srcos:research-package:community_truth_demo_report", "urn:srcos:reproduction-attempt:community_truth_demo_report_001", "urn:srcos:citation-graph:community_truth_demo_report"]
+      }
+    },
+    {
+      "step": 12,
+      "id": "demo.publication.export.blocked",
+      "command": "/lattice publication export urn:srcos:publication-artifact:community_truth_demo_report",
+      "route": "policy-fabric",
+      "expectedMode": "denied",
+      "expectedOutput": {
+        "status": "denied",
+        "policyRef": "urn:srcos:policy:publication-review-demo",
+        "because": ["ReviewDecision.state=needs-revision", "stable promotion remains blocked pending external evidence"]
+      }
+    }
+  ],
+  "validationRequirements": {
+    "requireSequentialSteps": true,
+    "requireRuntimeProfileCommands": true,
+    "requireAgentPlaneForExecution": true,
+    "requirePolicyFabricForGovernance": true,
+    "requireStablePromotionBlocked": true,
+    "requireNoNetworkSecretsOrHostMutation": true
+  }
+}
