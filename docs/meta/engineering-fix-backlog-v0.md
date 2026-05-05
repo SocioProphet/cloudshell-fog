@@ -18,9 +18,11 @@ As of the current `main` line:
 - policy root Kustomize selects the keyless Kyverno bundle
 - runtime image resolution uses the canonical resolver
 - production image pinning is represented by a concrete production Kustomize overlay
-- per-session NetworkPolicies are applied by the Kubernetes connector once this PR lands
+- per-session NetworkPolicies are applied by the Kubernetes connector
+- per-session NetworkPolicy creation has fake-client regression coverage
+- Lattice / Fog Shell command-bundle surfaces have landed after the runtime hardening tranche and route runtime-release inspection through Lattice Forge, Policy Fabric, and Prophet Platform readiness references
 
-That means EF-0001 through EF-0010 have an implemented baseline once this PR lands, except for residual production automation follow-through items explicitly noted below.
+That means EF-0001 through EF-0010 have an implemented baseline, except for residual production automation follow-through items explicitly noted below.
 
 ## Priority 0 — correctness / trust / deployability
 
@@ -116,16 +118,16 @@ Observed current state:
 
 ### EF-0009 — Turn per-session network policy from template to actual mechanism
 Status:
-- **completed once this PR lands**
+- **completed on `main`**
 
 Observed current state:
 - Kubernetes connector creates a per-session namespace
 - Kubernetes connector applies default-deny, gateway-ingress, and DNS/HTTPS egress NetworkPolicies inside each session namespace
 - RBAC grants the gateway permission to manage NetworkPolicies
 - `deploy/k8s/networkpolicy.yaml` is retained as a reference/manual bootstrap artifact, not the primary runtime mechanism
+- fake-client regression coverage verifies expected NetworkPolicy creation and selector intent
 
 Residual follow-on:
-- add fake-client unit tests around NetworkPolicy object creation if/when connector tests are expanded
 - consider exposing policy creation failures as richer audit events
 
 ### EF-0010 — Complete signed-image verification trust material
@@ -138,9 +140,18 @@ Observed current state:
 - root policy bundle selects keyless verification
 - placeholder public-key policy remains as compatibility/example path, not bundled default
 
+## Lattice / Fog Shell alignment note
+
+Recent Lattice command-bundle work routes runtime-release inspection across:
+- Lattice Forge runtime promotion evidence
+- Policy Fabric release decisions
+- Prophet Platform runtime release readiness
+
+Those command bundles are additive command/fixture surfaces. They do not redefine the gateway runtime, shared Fog deployment profile authority, or shared Fog control contracts.
+
 ## Suggested implementation order
 1. production release automation follow-through for real digest substitution
-2. optional connector fake-client tests for per-session NetworkPolicy creation
+2. richer audit event emission for policy/bootstrap failures where useful
 3. production hardening follow-through for EF-0010 where non-keyless trust material is required
 
 ## Working rule
