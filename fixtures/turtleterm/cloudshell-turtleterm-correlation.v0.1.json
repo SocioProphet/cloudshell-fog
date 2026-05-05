@@ -1,0 +1,42 @@
+{
+  "schema": "cloudshell-fog.turtleterm.correlation.v0.1",
+  "cloudshell_session": {
+    "session_id": "csf-session-0001",
+    "subject": "human:operator@example.com",
+    "workspace_id": "workspace:lattice-demo",
+    "policy_bundle_id": "policy:cloudshell-default",
+    "placement": {
+      "region": "us-east-1",
+      "node_id": "fog-node-01",
+      "tier": "fog",
+      "reasons": ["fog-preferred", "healthy", "capacity-ok"]
+    },
+    "runtime": {
+      "execution_domain": "cloudshell-fog/k8s",
+      "namespace": "cloudshell-csf-session-0001",
+      "pod": "shell",
+      "image_ref": "ghcr.io/socioprophet/cloudshell-fog/runtime@sha256:example"
+    }
+  },
+  "turtleterm_environment": {
+    "SOURCEOS_TERMINAL_SESSION_ID": "csf-session-0001",
+    "SOURCEOS_WORKSPACE": "workspace:lattice-demo",
+    "SOURCEOS_ACTOR_ID": "human:operator@example.com",
+    "SOURCEOS_POLICY_BUNDLE_ID": "policy:cloudshell-default",
+    "SOURCEOS_EXECUTION_DOMAIN": "cloudshell-fog/k8s"
+  },
+  "expected_receipt_context": {
+    "session_id": "csf-session-0001",
+    "workspace_id": "workspace:lattice-demo",
+    "actor_id": "human:operator@example.com",
+    "policy_bundle_id": "policy:cloudshell-default",
+    "execution_domain": "cloudshell-fog/k8s"
+  },
+  "correlation_keys": [
+    "session_id",
+    "workspace_id",
+    "actor_id",
+    "policy_bundle_id",
+    "execution_domain"
+  ]
+}
