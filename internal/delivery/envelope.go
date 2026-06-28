@@ -46,16 +46,16 @@ var (
 // reviewable, receipt-backed, policy-gated, and non-executing.
 func Validate(envelope DeliveryEnvelope) error {
 	if envelope.SchemaVersion != "0.1.0" {
-		return fmt.Errorf("%w: %s", ErrUnsupportedSchema, envelope.SchemaVersion)
+		return ErrUnsupportedSchema
 	}
 	if !strings.HasPrefix(envelope.EnvelopeID, "cloudshell-fog-delivery:") {
-		return fmt.Errorf("%w: %s", ErrInvalidEnvelopeID, envelope.EnvelopeID)
+		return ErrInvalidEnvelopeID
 	}
 	if envelope.SourceSystem != "scope-d" {
-		return fmt.Errorf("%w: %s", ErrInvalidSourceSystem, envelope.SourceSystem)
+		return ErrInvalidSourceSystem
 	}
 	if envelope.Purpose != "edge_assurance_review" && envelope.Purpose != "policy_gated_delivery_review" {
-		return fmt.Errorf("%w: %s", ErrInvalidPurpose, envelope.Purpose)
+		return ErrInvalidPurpose
 	}
 	if len(envelope.ArtifactRefs) == 0 {
 		return ErrMissingArtifacts
@@ -70,7 +70,7 @@ func Validate(envelope DeliveryEnvelope) error {
 		return ErrUnsafeCapability
 	}
 	if !strings.HasPrefix(envelope.ReceiptHash, "sha256:") || len(strings.TrimPrefix(envelope.ReceiptHash, "sha256:")) != 64 {
-		return fmt.Errorf("%w: %s", ErrInvalidReceiptHash, envelope.ReceiptHash)
+		return ErrInvalidReceiptHash
 	}
 	return nil
 }
